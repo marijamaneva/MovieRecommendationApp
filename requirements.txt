@@ -1,0 +1,25 @@
+# Core ML and Data Processing
+pandas
+numpy==1.24.4 
+scikit-learn
+sentence-transformers
+
+# Vector Database
+chromadb
+
+# API and Web
+requests
+gradio
+
+# Language Models and AI
+openai
+langchain
+langchain-openai
+
+# Environment and Config
+python-dotenv
+
+# Testing
+pytest
+pytest-cov
+pytest-mock
