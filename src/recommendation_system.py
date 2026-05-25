@@ -15,14 +15,20 @@ class MovieRecommender:
         # Initialize ChromaDB client
         self.chroma_client = chromadb.PersistentClient(path="data/embeddings")
 
-        # Get the collection
         embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
             model_name='all-MiniLM-L6-v2'
         )
-        self.collection = self.chroma_client.get_collection(
-            name="movie_collection",
-            embedding_function=embedding_function
-        )
+        try:
+            self.collection = self.chroma_client.get_collection(
+                name="movie_collection",
+                embedding_function=embedding_function,
+            )
+        except Exception:
+            self._initialize_database()
+            self.collection = self.chroma_client.get_collection(
+                name="movie_collection",
+                embedding_function=embedding_function,
+            )
 
         # Initialize the language model and memory
         self.memory = ConversationBufferMemory(
@@ -41,6 +47,26 @@ class MovieRecommender:
 
         # Setup prompt templates
         self._setup_prompts()
+
+    def _initialize_database(self):
+        """Download MovieLens data and build the ChromaDB collection on first run."""
+        print("First run: downloading data and building movie database (this takes a few minutes)...")
+        import os
+        sys_path_entry = os.path.dirname(__file__)
+        import sys
+        if sys_path_entry not in sys.path:
+            sys.path.insert(0, sys_path_entry)
+        from movie_data_preparation import download_and_prepare_movielens
+        from vector_database_setup import prepare_movie_descriptions, create_vector_database
+        import ast
+
+        movies_df = download_and_prepare_movielens()
+        movies_df['genres'] = movies_df['genres'].apply(
+            lambda g: ast.literal_eval(g) if isinstance(g, str) else g
+        )
+        movies_df = prepare_movie_descriptions(movies_df)
+        create_vector_database(movies_df)
+        print("Movie database ready.")
 
     def _setup_prompts(self):
         self.recommendation_template = """

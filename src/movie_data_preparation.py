@@ -16,16 +16,17 @@ def download_and_prepare_movielens():
         os.makedirs('data')
     
     # Download the dataset
-    url = 'https://files.grouplens.org/datasets/movielens/ml-latest.zip'
-    response = requests.get(url)
-    
+    url = 'https://files.grouplens.org/datasets/movielens/ml-latest-small.zip'
+    response = requests.get(url, timeout=60)
+    response.raise_for_status()
+
     # Extract the dataset
     with ZipFile(BytesIO(response.content)) as zip_file:
         zip_file.extractall('data')
-    
+
     # Load the movies and ratings data
-    movies_df = pd.read_csv('data/ml-latest/movies.csv')
-    ratings_df = pd.read_csv('data/ml-latest/ratings.csv')
+    movies_df = pd.read_csv('data/ml-latest-small/movies.csv')
+    ratings_df = pd.read_csv('data/ml-latest-small/ratings.csv')
     
     # Process the data
     # Extract year from title and create a clean title column

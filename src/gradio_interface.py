@@ -231,4 +231,5 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     </style>
     """)
 
-demo.launch(share=True)
+if __name__ == "__main__":
+    demo.launch(share=True)

@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 import os
 from sentence_transformers import SentenceTransformer
@@ -6,16 +7,28 @@ from chromadb.utils import embedding_functions
 
 def prepare_movie_descriptions(movies_df):
     """
-    Prepare textual descriptions of movies for embedding
+    Prepare JSON document strings for each movie (format expected by recommendation_system.py).
+    Also adds a plain-text 'description' column used as the embedding source.
     """
-    # Create a description for each movie that combines title, genres, and year
-    movies_df['description'] = movies_df.apply(
-        lambda row: f"Title: {row['clean_title']}. "
-                    f"Year: {row['year']}. "
-                    f"Genres: {', '.join(row['genres'])}. "
-                    f"Average Rating: {row['avg_rating']:.1f}/5 from {int(row['rating_count'])} users.",
-        axis=1
-    )
+    def make_doc(row):
+        genres = row['genres'] if isinstance(row['genres'], list) else []
+        year = str(row['year']) if pd.notna(row['year']) else "Unknown"
+        genre_str = ', '.join(genres) if genres else "Unknown"
+        plot = (
+            f"A {genre_str} film from {year}. "
+            f"Rated {row['avg_rating']:.1f}/5 by {int(row['rating_count'])} users."
+        )
+        doc = {
+            "title": row['clean_title'],
+            "year": year,
+            "genre": genre_str,
+            "director": "Unknown",
+            "actors": [],
+            "plot": plot,
+        }
+        return json.dumps(doc)
+
+    movies_df['description'] = movies_df.apply(make_doc, axis=1)
     return movies_df
 
 def create_vector_database(movies_df):
