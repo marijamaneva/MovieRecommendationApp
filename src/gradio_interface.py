@@ -168,7 +168,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     </div>
     """)
     
-    chatbot = gr.Chatbot(height=400)
+    chatbot = gr.Chatbot(height=400, type="tuples")
     movie_posters = gr.HTML(label="Movie Posters")
     
     with gr.Row():
