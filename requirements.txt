@@ -10,6 +10,7 @@ chromadb
 # API and Web
 requests
 gradio
+pyaudioop
 
 # Language Models and AI
 openai
